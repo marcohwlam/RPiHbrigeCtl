@@ -54,21 +54,21 @@ class Car:
         self.wheel_left.backward(0)
         self.wheel_right.backward(0)
 
-    def turn_left(self, sleep_time):
-        GPIO.output(self.wheel_left.step_pin_forward, GPIO.HIGH)
-        GPIO.output(self.wheel_right.step_pin_backward, GPIO.HIGH)
-        print "step_pin_backward running  motor "
+    def turn_left(self, sleep_time, power):
+        self.wheel_left.backward(power)
+        self.wheel_right.forward(power)
+        print "forwarding running  motor "
         time.sleep(sleep_time)
-        GPIO.output(self.wheel_left.step_pin_forward, GPIO.LOW)
-        GPIO.output(self.wheel_right.step_pin_backward, GPIO.LOW)
+        self.wheel_left.backward(0)
+        self.wheel_right.forward(0)
 
-    def turn_right(self, sleep_time):
-        GPIO.output(self.wheel_left.step_pin_backward, GPIO.HIGH)
-        GPIO.output(self.wheel_right.step_pin_forward, GPIO.HIGH)
-        print "step_pin_backward running  motor "
+    def turn_right(self, sleep_time, power):
+        self.wheel_left.forward(power)
+        self.wheel_right.backward(power)
+        print "forwarding running  motor "
         time.sleep(sleep_time)
-        GPIO.output(self.wheel_left.step_pin_backward, GPIO.LOW)
-        GPIO.output(self.wheel_right.step_pin_forward, GPIO.LOW)
+        self.wheel_left.forward(0)
+        self.wheel_right.backward(0)
 
     def blocked(self):
         pass
