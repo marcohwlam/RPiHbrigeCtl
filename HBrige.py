@@ -11,41 +11,48 @@ print " mode =" + str(mode)
 
 
 class Wheel:
-    def __init__(self, step_pin_forward, step_pin_backward, power_pin, power_duty_cycle):
+    def __init__(self, step_pin_forward, step_pin_backward, power_scale):
         self.step_pin_forward = step_pin_forward
         self.step_pin_backward = step_pin_backward
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.step_pin_forward, GPIO.OUT)
         GPIO.setup(self.step_pin_backward, GPIO.OUT)
-        GPIO.setup(power_pin, GPIO.OUT)
-        self.power_pwm = GPIO.PWM(power_pin, 180)
-        self.power_pwm.start(power_duty_cycle)
-        self.power_pwm.ChangeDutyCycle(power_duty_cycle)
+        self.power_duty_cycle = 0
+        self.forward_pwm = GPIO.PWM(step_pin_forward, 1000)
+        self.forward_pwm.start(self.power_duty_cycle)
+        self.backward_pwm = GPIO.PWM(step_pin_backward, 1000)
+        self.backward_pwm.start(self.power_duty_cycle)
+        self.power_scale = power_scale
 
-    def set_power(self, power_duty_cycle):
-        self.power_pwm.ChangeDutyCycle(power_duty_cycle)
+    def forward(self, power_duty_cycle):
+        self.forward_pwm.ChangeDutyCycle(power_duty_cycle * self.power_scale)
 
+    def backward(self, power_duty_cycle):
+        self.backward_pwm.ChangeDutyCycle(power_duty_cycle * self.power_scale)
+
+    def set_power_scale(self, power_scale):
+        self.power_scale = power_scale
 
 class Car:
     def __init__(self):
-        self.wheel_left = Wheel(26, 6, 4, 100)
-        self.wheel_right = Wheel(13, 5, 17, 100)
+        self.wheel_left = Wheel(26, 6, 1)
+        self.wheel_right = Wheel(13, 5, 0.9)
 
-    def forward(self, sleep_time):
-        GPIO.output(self.wheel_left.step_pin_forward, GPIO.HIGH)
-        GPIO.output(self.wheel_right.step_pin_forward, GPIO.HIGH)
+    def forward(self, sleep_time, power):
+        self.wheel_left.forward(power)
+        self.wheel_right.forward(power)
         print "forwarding running  motor "
         time.sleep(sleep_time)
-        GPIO.output(self.wheel_left.step_pin_forward, GPIO.LOW)
-        GPIO.output(self.wheel_right.step_pin_forward, GPIO.LOW)
+        self.wheel_left.forward(0)
+        self.wheel_right.forward(0)
 
-    def backward(self, sleep_time):
-        GPIO.output(self.wheel_left.step_pin_backward, GPIO.HIGH)
-        GPIO.output(self.wheel_right.step_pin_backward, GPIO.HIGH)
-        print "step_pin_backward running  motor "
+    def backward(self, sleep_time, power):
+        self.wheel_left.backward(power)
+        self.wheel_right.backward(power)
+        print "forwarding running  motor "
         time.sleep(sleep_time)
-        GPIO.output(self.wheel_left.step_pin_backward, GPIO.LOW)
-        GPIO.output(self.wheel_right.step_pin_backward, GPIO.LOW)
+        self.wheel_left.backward(0)
+        self.wheel_right.backward(0)
 
     def turn_left(self, sleep_time):
         GPIO.output(self.wheel_left.step_pin_forward, GPIO.HIGH)
@@ -72,8 +79,9 @@ class Car:
 
 try:
     my_car = Car()
-    # my_car.forward(10)
-    my_car.backward(10)
+    for i in range(0, 100):
+        my_car.forward(0.3, 50)
+        my_car.backward(0.2, 50)
     # my_car.turn_right(1)
     # my_car.turn_left(1)
 finally:
