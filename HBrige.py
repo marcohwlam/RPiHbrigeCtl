@@ -1,7 +1,9 @@
 # Import required libraries
 import datetime
 import time
+
 import RPi.GPIO as GPIO
+
 
 # Use BCM GPIO references
 # instead of physical pin numbers
@@ -95,17 +97,17 @@ class Tank:
     # def __del__(self):
     #     GPIO.cleanup()
 
-
-try:
-    my_car = Tank()
-    for i in range(0, 100):
-        my_car.forward(2, 50)
-        time.sleep(1)
-        my_car.backward(2, 50)
-        time.sleep(1)
-        # my_car.turn_left(0.9, 50)
-        # time.sleep(0.5)
-        # my_car.turn_right(0.9, 50)
-        # time.sleep(0.5)
-finally:
-    GPIO.cleanup() # this ensures a clean exit
+#
+# try:
+#     my_car = Tank()
+#     for i in range(0, 100):
+#         my_car.forward(2, 50)
+#         time.sleep(1)
+#         my_car.backward(2, 50)
+#         time.sleep(1)
+#         # my_car.turn_left(0.9, 50)
+#         # time.sleep(0.5)
+#         # my_car.turn_right(0.9, 50)
+#         # time.sleep(0.5)
+# finally:
+#     GPIO.cleanup() # this ensures a clean exit
