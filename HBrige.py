@@ -1,16 +1,32 @@
 # Import required libraries
-import sys
+import datetime
 import time
 import RPi.GPIO as GPIO
 
 # Use BCM GPIO references
 # instead of physical pin numbers
 # GPIO.setmode(GPIO.BCM)
-mode = GPIO.getmode()
-print " mode =" + str(mode)
+# mode = GPIO.getmode()
+# print " mode =" + str(mode)
 
 
-class Wheel:
+class HallSensor:
+    def __init__(self, pin):
+        self.pin = pin
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(self.pin, GPIO.IN)
+        GPIO.add_event_detect(self.pin, GPIO.FALLING, callback=self.sensor_callback)
+        print GPIO.input(4)
+
+    @staticmethod
+    def sensor_callback(channel):
+        # Called if sensor output goes LOW
+        timestamp = time.time()
+        stamp = datetime.datetime.fromtimestamp(timestamp).strftime('%H:%M:%S')
+        print "Sensor LOW " + stamp
+
+
+class Track:
     def __init__(self, step_pin_forward, step_pin_backward, power_scale):
         self.step_pin_forward = step_pin_forward
         self.step_pin_backward = step_pin_backward
@@ -33,56 +49,63 @@ class Wheel:
     def set_power_scale(self, power_scale):
         self.power_scale = power_scale
 
-class Car:
+
+class Tank:
     def __init__(self):
-        self.wheel_left = Wheel(26, 6, 1)
-        self.wheel_right = Wheel(13, 5, 0.9)
+        self.track_right = Track(26, 6, 1)
+        self.track_left = Track(5, 13, 0.8)
+        self.hallSensorLeft = HallSensor(4)
+        # self.hallSensorRight = HallSensor(4)
 
     def forward(self, sleep_time, power):
-        self.wheel_left.forward(power)
-        self.wheel_right.forward(power)
+        self.track_left.forward(power)
+        self.track_right.forward(power)
         print "forwarding running  motor "
         time.sleep(sleep_time)
-        self.wheel_left.forward(0)
-        self.wheel_right.forward(0)
+        self.track_left.forward(0)
+        self.track_right.forward(0)
 
     def backward(self, sleep_time, power):
-        self.wheel_left.backward(power)
-        self.wheel_right.backward(power)
-        print "forwarding running  motor "
+        self.track_left.backward(power)
+        self.track_right.backward(power)
+        print "back running  motor "
         time.sleep(sleep_time)
-        self.wheel_left.backward(0)
-        self.wheel_right.backward(0)
+        self.track_left.backward(0)
+        self.track_right.backward(0)
 
     def turn_left(self, sleep_time, power):
-        self.wheel_left.backward(power)
-        self.wheel_right.forward(power)
-        print "forwarding running  motor "
+        self.track_left.backward(power)
+        self.track_right.forward(power)
+        print "left running  motor "
         time.sleep(sleep_time)
-        self.wheel_left.backward(0)
-        self.wheel_right.forward(0)
+        self.track_left.backward(0)
+        self.track_right.forward(0)
 
     def turn_right(self, sleep_time, power):
-        self.wheel_left.forward(power)
-        self.wheel_right.backward(power)
-        print "forwarding running  motor "
+        self.track_left.forward(power)
+        self.track_right.backward(power)
+        print "right running  motor "
         time.sleep(sleep_time)
-        self.wheel_left.forward(0)
-        self.wheel_right.backward(0)
+        self.track_left.forward(0)
+        self.track_right.backward(0)
 
     def blocked(self):
         pass
 
     # def __del__(self):
-        # GPIO.cleanup()
+    #     GPIO.cleanup()
 
 
 try:
-    my_car = Car()
+    my_car = Tank()
     for i in range(0, 100):
-        my_car.forward(0.3, 50)
-        my_car.backward(0.2, 50)
-    # my_car.turn_right(1)
-    # my_car.turn_left(1)
+        my_car.forward(2, 50)
+        time.sleep(1)
+        my_car.backward(2, 50)
+        time.sleep(1)
+        # my_car.turn_left(0.9, 50)
+        # time.sleep(0.5)
+        # my_car.turn_right(0.9, 50)
+        # time.sleep(0.5)
 finally:
     GPIO.cleanup() # this ensures a clean exit
