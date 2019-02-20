@@ -10,16 +10,20 @@ tank = HBrige.Tank()
 def control():
     req_data = request.get_json()
     print req_data
-    time = req_data['time']
-    power = req_data['power']
-    if req_data['direction'] == 'forward':
-        tank.forward(time, power)
-    elif req_data['direction'] == 'backward':
-        tank.backward(time, power)
-    elif req_data['direction'] == 'right':
-        tank.turn_right(time, power)
-    elif req_data['direction'] == 'left':
-        tank.turn_left(time, power)
+    if req_data['cmd'] == 'stop':
+        tank.stop()
+    if req_data['cmd'] == 'move':
+        dutyCycle = req_data['dutyCycle']
+        if req_data['side'] == 'left':
+            if req_data['direction'] == 'up':
+                tank.forward_left(dutyCycle)
+            elif req_data['direction'] == 'down':
+                tank.backward_left(dutyCycle)
+        elif req_data['side'] == 'right':
+            if req_data['direction'] == 'up':
+                tank.backward_left(dutyCycle)
+            elif req_data['direction'] == 'down':
+                tank.backward_right(dutyCycle)
     return jsonify({'result': True})
 
 
@@ -29,4 +33,4 @@ def hello_world():
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port='3000')
+    app.run(host="0.0.0.0", port='3001')

@@ -1,9 +1,16 @@
 # Import required libraries
 import datetime
+import logging
 import time
+# from sys import stdin
+# import sys, json
+from datetime import datetime
 
 import RPi.GPIO as GPIO
+from socketIO_client import SocketIO, LoggingNamespace
 
+logging.getLogger('socketIO-client').setLevel(logging.DEBUG)
+logging.basicConfig()
 
 # Use BCM GPIO references
 # instead of physical pin numbers
@@ -91,23 +98,63 @@ class Tank:
         self.track_left.forward(0)
         self.track_right.backward(0)
 
-    def blocked(self):
-        pass
+    def forward_left(self, duty_cyc):
+        self.track_left.forward(duty_cyc)
+        print "left running  motor "
+
+    def forward_right(self, duty_cyc):
+        self.track_right.forward(duty_cyc)
+        print "right running  motor "
+
+    def forward_left(self, duty_cyc):
+        self.track_left.forward(duty_cyc)
+        print "left running  motor "
+
+    def forward_right(self, duty_cyc):
+        self.track_right.forward(duty_cyc)
+        print "left running  motor "
+
+    def backward_left(self, duty_cyc):
+        self.track_left.backward(duty_cyc)
+        print "left running  motor "
+
+    def backward_right(self, duty_cyc):
+        self.track_right.backward(duty_cyc)
+        print "left running  motor "
+
+    def stop(self):
+        print "motor stop"
+        self.track_left.backward(0)
+        self.track_right.backward(0)
+        self.track_left.forward(0)
+        self.track_right.forward(0)
 
     # def __del__(self):
     #     GPIO.cleanup()
 
-#
-# try:
-#     my_car = Tank()
-#     for i in range(0, 100):
-#         my_car.forward(2, 50)
-#         time.sleep(1)
-#         my_car.backward(2, 50)
-#         time.sleep(1)
-#         # my_car.turn_left(0.9, 50)
-#         # time.sleep(0.5)
-#         # my_car.turn_right(0.9, 50)
-#         # time.sleep(0.5)
-# finally:
-#     GPIO.cleanup() # this ensures a clean exit
+
+# def read_in():
+#     lines = sys.stdin.readline()
+#     return json.loads(lines)
+
+
+try:
+    print ("Initializing Tank")
+    my_car = Tank()
+    with SocketIO('localhost', 3000, LoggingNamespace) as socketIO:
+        while True:
+            now = datetime.now()
+            socketIO.emit('python-message', now.strftime("%-d %b %Y %H:%M:%S.%f"))
+            socketIO.wait(seconds=1)
+            print "hi"
+    # while True:
+    #     try:
+    #         cmd = sys.stdin.readline()
+    #         # a = sys.stdin.readline()
+    #         print cmd
+    #     except:
+    #         print "unknow cmd"
+
+finally:
+    print "finally"
+    GPIO.cleanup()  # this ensures a clean exit
