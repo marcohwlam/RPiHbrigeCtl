@@ -4,7 +4,7 @@ class RoomClean:
 
         def dfs(x, y, dx, dy):
             # 1, Clean current
-            robot.clean();
+            robot.clean()
             path.add((x, y))
 
             # 2, Clean next

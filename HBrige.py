@@ -1,9 +1,6 @@
-# Import required libraries
 import datetime
 import logging
 import time
-# from sys import stdin
-# import sys, json
 from datetime import datetime
 
 import RPi.GPIO as GPIO
@@ -36,7 +33,7 @@ class HallSensor:
 
 
 class Track:
-    def __init__(self, step_pin_forward, step_pin_backward, power_scale):
+    def __init__(self, step_pin_forward, step_pin_backward, power_scale=1.0, min_duty_cycle=30):
         self.step_pin_forward = step_pin_forward
         self.step_pin_backward = step_pin_backward
         GPIO.setmode(GPIO.BCM)
@@ -47,13 +44,20 @@ class Track:
         self.forward_pwm.start(self.power_duty_cycle)
         self.backward_pwm = GPIO.PWM(step_pin_backward, 1000)
         self.backward_pwm.start(self.power_duty_cycle)
-        self.power_scale = power_scale
+        self.power_scale = power_scale * (100 - min_duty_cycle) / 100
+        self.min_duty_cycle = min_duty_cycle
 
     def forward(self, power_duty_cycle):
-        self.forward_pwm.ChangeDutyCycle(power_duty_cycle * self.power_scale)
+        if power_duty_cycle == 0:
+            self.forward_pwm.ChangeDutyCycle(0)
+            return
+        self.forward_pwm.ChangeDutyCycle(power_duty_cycle * self.power_scale + self.min_duty_cycle)
 
     def backward(self, power_duty_cycle):
-        self.backward_pwm.ChangeDutyCycle(power_duty_cycle * self.power_scale)
+        if power_duty_cycle == 0:
+            self.backward_pwm.ChangeDutyCycle(0)
+            return
+        self.backward_pwm.ChangeDutyCycle(power_duty_cycle * self.power_scale + self.min_duty_cycle)
 
     def set_power_scale(self, power_scale):
         self.power_scale = power_scale
@@ -62,8 +66,8 @@ class Track:
 class Tank:
     def __init__(self):
         print("Initializing Tank")
-        self.track_right = Track(26, 6, 1)
-        self.track_left = Track(5, 13, 0.8)
+        self.track_right = Track(26, 6)
+        self.track_left = Track(5, 13)
         self.hallSensorLeft = HallSensor(4)
         # self.hallSensorRight = HallSensor(4)
 
@@ -122,9 +126,22 @@ class Tank:
         self.track_left.forward(0)
         self.track_right.forward(0)
 
+    def stop_left(self):
+        print("motor stop")
+        self.track_left.backward(0)
+        self.track_left.forward(0)
+
+    def stop_right(self):
+        print("motor stop")
+        self.track_right.backward(0)
+        self.track_right.forward(0)
+
 # try:
 #     my_car = Tank()
-#
+#     for i in range(0, 100):
+#         my_car.forward_left(100)
+#         time.sleep(1)
+#         my_car.stop()
 # #
 # finally:
 #     print("finally")

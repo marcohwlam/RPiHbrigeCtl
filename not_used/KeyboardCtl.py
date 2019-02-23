@@ -1,8 +1,4 @@
 from pynput.keyboard import Key, Listener
-import HBrige
-import pygame
-import sys
-import os
 
 
 def on_press(key):

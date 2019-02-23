@@ -14,7 +14,8 @@ ctlMap = {
     "down left": my_tank.backward_left,
     "up right": my_tank.forward_right,
     "down right": my_tank.backward_right,
-    "end": my_tank.stop
+    "left end": my_tank.stop_left,
+    "right end": my_tank.stop_right
 }
 
 
@@ -23,7 +24,7 @@ def parse_cmd(*args):
     print(cmdJson)
     try:
         if cmdJson['cmd'] == "end":
-            ctlMap["end"]()
+            ctlMap[cmdJson['side'] + " end"]()
         if cmdJson['cmd'] == "move":
             ctlMap[cmdJson['direction']['y'] + " " + cmdJson['side']](int(float(cmdJson['dutyCycle'])))
     except:
